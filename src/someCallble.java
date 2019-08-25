@@ -7,7 +7,7 @@ public class someCallble implements Callable<String> {
     @Override
     public String call() throws Exception {
         System.out.println("call in someCallble");
-        sleep(10 * 1000);
+        sleep(1 * 1000);
         return "moshe";
     }
 }

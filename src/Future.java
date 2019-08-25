@@ -2,6 +2,10 @@ public class Future<V> {
 
     private V val;
 
+    public Future() {
+        this.val = null;
+    }
+
     public synchronized void set(V v) {
         val = v;
         System.out.println("Wake from set in Future");

@@ -4,14 +4,14 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * In this ThreadPool we take care of Callable and Runnable,
- * While Runnable run by numofThread,
+ * While Runnable run by numOfThread,
  */
-public class MyThreadpool {
+public class MyThreadPool {
     private final BlockingQueue<Runnable> queue;
     private final Thread[] myThreads;
     private volatile boolean stop;
 
-    public MyThreadpool(int numOfThreads) {
+    public MyThreadPool(int numOfThreads) {
         this.queue = new LinkedBlockingDeque<>();
         myThreads = new Thread[numOfThreads];
         stop = false;

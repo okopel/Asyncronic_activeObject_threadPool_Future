@@ -1,11 +1,8 @@
 import static java.lang.Thread.sleep;
 
 public class myMain {
-
     public static void main(String[] args) throws InterruptedException {
-        MyThreadpool tp = new MyThreadpool(5);
-
-
+        MyThreadPool tp = new MyThreadPool(5);
         tp.addRunnable(new someRunnable());
         tp.addRunnable(new someRunnable());
         Future<String> f = tp.addCallable(new someCallable());

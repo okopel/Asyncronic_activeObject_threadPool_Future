@@ -7,22 +7,20 @@ import java.util.concurrent.LinkedBlockingDeque;
  * While Runnable run by numofThread,
  */
 public class MyThreadpool {
-    private final BlockingQueue<Runnable> runnableBlockingQueue;
-    private final BlockingQueue<Callable> callableBlockingQueue;
+    private final BlockingQueue<Runnable> queue;
     private final Thread[] myThreads;
     private volatile boolean stop;
 
-    public MyThreadpool(int numOfThreadsRunning, int numOfThreadsCalling) {
-        this.runnableBlockingQueue = new LinkedBlockingDeque<>();
-        callableBlockingQueue = new LinkedBlockingDeque<>();
-        myThreads = new Thread[numOfThreadsRunning + numOfThreadsCalling];
+    public MyThreadpool(int numOfThreads) {
+        this.queue = new LinkedBlockingDeque<>();
+        myThreads = new Thread[numOfThreads];
         stop = false;
-        for (int i = 0; i < numOfThreadsRunning; i++) {
+        for (int i = 0; i < numOfThreads; i++) {
             myThreads[i] = new Thread(() -> {
                 while (!stop) {
                     try {
-                        System.out.println("thread  take a task");
-                        runnableBlockingQueue.take().run();
+                        System.out.println("thread take a task");
+                        queue.take().run();
                     } catch (InterruptedException ignored) {
                     }
                 }
@@ -30,34 +28,22 @@ public class MyThreadpool {
             });
             myThreads[i].start();
         }
-        for (int i = numOfThreadsRunning; i < numOfThreadsRunning + numOfThreadsCalling; i++) {
-            myThreads[i] = new Thread(() -> {
-                while (!stop) {
-                    try {
-                        callableBlockingQueue.take().call();
-                    } catch (Exception ignored) {
-                    }
-                }
-                System.out.println("Thread has gone");
-            }
-            );
-            myThreads[i].start();
-        }
     }
 
     public void addRunnable(Runnable r) throws InterruptedException {
         if (!stop) {
-            runnableBlockingQueue.put(r);
+            queue.put(r);
         }
-
     }
 
     public <V> Future<V> addCallable(Callable<V> c) throws InterruptedException {
         if (!stop) {
             Future<V> f = new Future<>();
-            callableBlockingQueue.put(() -> {
-                f.set(c.call());
-                return f;
+            addRunnable(() -> {
+                try {
+                    f.set(c.call());
+                } catch (Exception ignored) {
+                }
             });
             return f;
         }

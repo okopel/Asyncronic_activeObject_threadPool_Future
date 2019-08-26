@@ -46,16 +46,22 @@ public class MyThreadpool {
     }
 
     public void addRunnable(Runnable r) throws InterruptedException {
-        runnableBlockingQueue.put(r);
+        if (!stop) {
+            runnableBlockingQueue.put(r);
+        }
+
     }
 
     public <V> Future<V> addCallable(Callable<V> c) throws InterruptedException {
-        Future<V> f = new Future<>();
-        callableBlockingQueue.put(() -> {
-            f.set(c.call());
+        if (!stop) {
+            Future<V> f = new Future<>();
+            callableBlockingQueue.put(() -> {
+                f.set(c.call());
+                return f;
+            });
             return f;
-        });
-        return f;
+        }
+        return null;
     }
 
     public void stop() {

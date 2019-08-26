@@ -4,9 +4,9 @@ public class myMain {
         MyThreadpool tp = new MyThreadpool(5, 5);
         tp.addRunnable(new someRunnable());
         tp.addRunnable(new someRunnable());
-        Future<String> f = tp.submitCallable(new someCallable());
-        Future<String> f2 = tp.submitCallable(new someCallable());
-        Future<String> f3 = tp.submitCallable(
+        Future<String> f = tp.addCallable(new someCallable());
+        Future<String> f2 = tp.addCallable(new someCallable());
+        Future<String> f3 = tp.addCallable(
                 new someCallable()).
                 thenExecute((x) -> x + "--" + x).
                 thenExecute(String::toUpperCase);

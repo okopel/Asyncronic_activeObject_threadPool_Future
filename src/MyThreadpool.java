@@ -9,12 +9,10 @@ import java.util.concurrent.LinkedBlockingDeque;
 public class MyThreadpool {
     private final BlockingQueue<Runnable> runnableBlockingQueue;
     private final BlockingQueue<Callable> callableBlockingQueue;
+    private final Thread[] myThreads;
     private volatile boolean stop;
 
-    private final Thread[] myThreads;
-
     public MyThreadpool(int numOfThreadsRunning, int numOfThreadsCalling) {
-
         this.runnableBlockingQueue = new LinkedBlockingDeque<>();
         callableBlockingQueue = new LinkedBlockingDeque<>();
         myThreads = new Thread[numOfThreadsRunning + numOfThreadsCalling];
@@ -32,7 +30,6 @@ public class MyThreadpool {
             });
             myThreads[i].start();
         }
-
         for (int i = numOfThreadsRunning; i < numOfThreadsRunning + numOfThreadsCalling; i++) {
             myThreads[i] = new Thread(() -> {
                 while (!stop) {
@@ -52,24 +49,12 @@ public class MyThreadpool {
         runnableBlockingQueue.put(r);
     }
 
-    public <V> Future<V> submitCallable(Callable<V> c) throws InterruptedException {
+    public <V> Future<V> addCallable(Callable<V> c) throws InterruptedException {
         Future<V> f = new Future<>();
         callableBlockingQueue.put(() -> {
             f.set(c.call());
             return f;
         });
-        return f;
-    }
-
-    public <V> Future<V> submitImmidateCallable(Callable<V> c) {
-        Future<V> f = new Future<>();
-        new Thread(() -> {
-            try {
-                f.set(c.call());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
         return f;
     }
 

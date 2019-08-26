@@ -3,25 +3,24 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
- * In this ThreadPool we take care of Callable and Runnble,
+ * In this ThreadPool we take care of Callable and Runnable,
  * While Runnable run by numofThread,
  */
 public class MyThreadpool {
-    private BlockingQueue<Runnable> runnableBlockingQueue;
-    private BlockingQueue<Callable> callbleBlockingQueue;
+    private final BlockingQueue<Runnable> runnableBlockingQueue;
+    private final BlockingQueue<Callable> callableBlockingQueue;
     private volatile boolean stop;
-    private int numOfRunnable;
-    private int numOfCallable;
+
+    private final Thread[] myThreads;
 
     public MyThreadpool(int numOfThreadsRunning, int numOfThreadsCalling) {
-        this.numOfRunnable = numOfThreadsRunning;
-        this.numOfCallable = numOfThreadsCalling;
-        this.runnableBlockingQueue = new LinkedBlockingDeque<>();
-        callbleBlockingQueue = new LinkedBlockingDeque<>();
 
+        this.runnableBlockingQueue = new LinkedBlockingDeque<>();
+        callableBlockingQueue = new LinkedBlockingDeque<>();
+        myThreads = new Thread[numOfThreadsRunning + numOfThreadsCalling];
         stop = false;
         for (int i = 0; i < numOfThreadsRunning; i++) {
-            new Thread(() -> {
+            myThreads[i] = new Thread(() -> {
                 while (!stop) {
                     try {
                         System.out.println("thread  take a task");
@@ -30,32 +29,32 @@ public class MyThreadpool {
                     }
                 }
                 System.out.println("Thread has gone");
-            }).start();
-
+            });
+            myThreads[i].start();
         }
 
         for (int i = numOfThreadsRunning; i < numOfThreadsRunning + numOfThreadsCalling; i++) {
-            new Thread(() -> {
+            myThreads[i] = new Thread(() -> {
                 while (!stop) {
                     try {
-                        callbleBlockingQueue.take().call();
+                        callableBlockingQueue.take().call();
                     } catch (Exception ignored) {
                     }
                 }
                 System.out.println("Thread has gone");
             }
-            ).start();
-
+            );
+            myThreads[i].start();
         }
     }
 
-    public void addRunnble(Runnable r) throws InterruptedException {
+    public void addRunnable(Runnable r) throws InterruptedException {
         runnableBlockingQueue.put(r);
     }
 
-    public <V> Future<V> submitCallble(Callable<V> c) throws InterruptedException {
+    public <V> Future<V> submitCallable(Callable<V> c) throws InterruptedException {
         Future<V> f = new Future<>();
-        callbleBlockingQueue.put(() -> {
+        callableBlockingQueue.put(() -> {
             f.set(c.call());
             return f;
         });
@@ -74,23 +73,12 @@ public class MyThreadpool {
         return f;
     }
 
-    public void stop() throws InterruptedException {
+    public void stop() {
         this.stop = true;
-        //Enter dummy missions to wake the threads
-        for (int i = 0; i < numOfRunnable; i++) {
-            this.runnableBlockingQueue.put(new Runnable() {
-                @Override
-                public void run() {
-                }
-            });
-        }
-        for (int i = 0; i < numOfCallable; i++) {
-            this.callbleBlockingQueue.put(new Callable() {
-                @Override
-                public Object call() throws Exception {
-                    return null;
-                }
-            });
+        for (Thread myThread : myThreads) {
+            if (myThread != null) {
+                myThread.interrupt();
+            }
         }
     }
 }

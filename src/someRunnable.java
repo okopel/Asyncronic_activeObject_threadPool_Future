@@ -1,6 +1,6 @@
 import static java.lang.Thread.sleep;
 
-public class someRunnble implements Runnable {
+public class someRunnable implements Runnable {
 
     @Override
     public void run() {

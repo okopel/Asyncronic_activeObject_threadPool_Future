@@ -19,12 +19,10 @@ public class MyThreadpool {
             myThreads[i] = new Thread(() -> {
                 while (!stop) {
                     try {
-                        System.out.println("thread take a task");
                         queue.take().run();
                     } catch (InterruptedException ignored) {
                     }
                 }
-                System.out.println("Thread has gone");
             });
             myThreads[i].start();
         }
@@ -58,4 +56,10 @@ public class MyThreadpool {
             }
         }
     }
+
+    public int getSize() {
+        return this.queue.size();
+    }
+
+
 }

@@ -1,3 +1,4 @@
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Future<V> {
@@ -12,7 +13,6 @@ public class Future<V> {
 
     public synchronized void set(V v) {
         val = v;
-        System.out.println("Wake from set in Future");
         if (runnable != null) {
             runnable.run();
         }
@@ -23,7 +23,6 @@ public class Future<V> {
         if (val == null) {
             synchronized (this) {
                 if (val == null) {
-                    System.out.println("I entered to wait in Future");
                     wait();
                 }
             }
@@ -37,4 +36,9 @@ public class Future<V> {
         return f;
     }
 
+    public void thenAccept(Consumer<V> consumer) {
+        runnable = () -> consumer.accept(val);
+    }
+
 }
+

@@ -1,7 +1,7 @@
 public class myMain {
 
     public static void main(String[] args) throws InterruptedException {
-        MyThreadpool tp = new MyThreadpool(5, 5);
+        MyThreadpool tp = new MyThreadpool(5);
         tp.addRunnable(new someRunnable());
         tp.addRunnable(new someRunnable());
         Future<String> f = tp.addCallable(new someCallable());

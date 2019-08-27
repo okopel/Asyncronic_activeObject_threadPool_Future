@@ -1,64 +1,57 @@
-import java.util.concurrent.BlockingQueue;
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
-import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * In this ThreadPool we take care of Callable and Runnable,
  * While Runnable run by numOfThread,
  */
 public class MyThreadPool {
-    private final BlockingQueue<Runnable> queue;
-    private final Thread[] myThreads;
-    private volatile boolean stop;
+    private int max;
+    private ArrayList<ActiveObject> pool;
 
-    public MyThreadPool(int numOfThreads) {
-        this.queue = new LinkedBlockingDeque<>();
-        myThreads = new Thread[numOfThreads];
-        stop = false;
-        for (int i = 0; i < numOfThreads; i++) {
-            myThreads[i] = new Thread(() -> {
-                while (!stop) {
-                    try {
-                        queue.take().run();
-                    } catch (InterruptedException ignored) {
-                    }
+    public MyThreadPool(int maxAO) throws Exception {
+        if (maxAO < 1) {
+            throw new Exception("The max must be larger then 1");
+        }
+        max = maxAO;
+        pool = new ArrayList<>();
+        //this.queue = new PriorityBlockingQueue<>(maxAO, (Runnable a, Runnable b) -> {            return a.hashCode() - b.hashCode();        });
+    }
+
+    public void execute(Runnable r) throws InterruptedException {
+        if (pool.size() < max) {
+            ActiveObject ao = new ActiveObject();
+            ao.execute(r);
+            ao.start();
+            pool.add(ao);
+        } else {
+            int min = Integer.MAX_VALUE;
+            ActiveObject minAo = null;
+            for (ActiveObject ao : pool) {
+                if (ao.getSize() < min) {
+                    min = ao.getSize();
+                    minAo = ao;
                 }
-            });
-            myThreads[i].start();
-        }
-    }
-
-    public void addRunnable(Runnable r) throws InterruptedException {
-        if (!stop) {
-            queue.put(r);
-        }
-    }
-
-    public <V> Future<V> addCallable(Callable<V> c) throws InterruptedException {
-        if (!stop) {
-            Future<V> f = new Future<>();
-            addRunnable(() -> {
-                try {
-                    f.set(c.call());
-                } catch (Exception ignored) {
-                }
-            });
-            return f;
-        }
-        return null;
-    }
-
-    public void stop() {
-        this.stop = true;
-        for (Thread myThread : myThreads) {
-            if (myThread != null) {
-                myThread.interrupt();
             }
+            minAo.execute(r);
         }
     }
 
-    public int getSize() {
-        return this.queue.size();
+    public <V> Future<V> submit(Callable<V> c) throws InterruptedException {
+        Future<V> f = new Future<>();
+        execute(() -> {
+            try {
+                f.set(c.call());
+            } catch (Exception ignored) {
+            }
+        });
+        return f;
+    }
+
+    public void stop() throws InterruptedException {
+        for (ActiveObject ao : pool) {
+            ao.stop();
+        }
     }
 
 

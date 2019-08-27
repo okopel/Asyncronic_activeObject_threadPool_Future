@@ -28,12 +28,15 @@ public class MyThreadPool {
             int min = Integer.MAX_VALUE;
             ActiveObject minAo = null;
             for (ActiveObject ao : pool) {
-                if (ao.getSize() < min) {
-                    min = ao.getSize();
+                final int size = ao.getSize();
+                if (size < min) {
+                    min = size;
                     minAo = ao;
                 }
             }
-            minAo.execute(r);
+            if (minAo != null) {
+                minAo.execute(r);
+            }
         }
     }
 

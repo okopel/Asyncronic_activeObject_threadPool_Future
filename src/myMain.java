@@ -5,9 +5,9 @@ public class myMain {
         MyThreadPool tp = new MyThreadPool(5);
         tp.execute(new someRunnable());
         tp.execute(new someRunnable());
-        Future<String> f = tp.submit(new someCallable("לkopel"));
+        Future<String> f = tp.submit(new someCallable("kopel"));
         Future<String> f2 = tp.submit(
-                new someCallable("dkodfsx")).
+                new someCallable("Ori")).
                 thenExecute((x) -> x + "--" + x).
                 thenExecute(String::toUpperCase);
         System.out.println(f.get());

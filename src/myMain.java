@@ -5,15 +5,14 @@ public class myMain {
         MyThreadPool tp = new MyThreadPool(5);
         tp.execute(new someRunnable());
         tp.execute(new someRunnable());
-        Future<String> f = tp.submit(new someCallable());
+        Future<String> f = tp.submit(new someCallable("לkopel"));
         Future<String> f2 = tp.submit(
-                new someCallable()).
+                new someCallable("dkodfsx")).
                 thenExecute((x) -> x + "--" + x).
                 thenExecute(String::toUpperCase);
         System.out.println(f.get());
         System.out.println(f2.get());
-        tp.submit(
-                new someCallable()).
+        tp.submit(new someCallable("Gad")).
                 thenExecute(String::length).
                 thenExecute(x -> x * x).
                 thenAccept(System.out::println);

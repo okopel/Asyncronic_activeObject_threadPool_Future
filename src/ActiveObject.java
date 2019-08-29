@@ -14,15 +14,16 @@ public class ActiveObject {
         thread = new Thread(() -> {
             while (!stop) {
                 try {
+                    //waiting some seconds until timeout.
                     Runnable r = queue.poll(timeOut, TimeUnit.SECONDS);
                     if (r == null) {
+                        //timeOut -> break the while loop and close this thread
                         break;
                     } else {
                         r.run();
                     }
                     //queue.take().run();
                 } catch (InterruptedException ignored) {
-                    //System.out.println("catch");
                 }
             }
             System.out.println("Thread Exit!!");

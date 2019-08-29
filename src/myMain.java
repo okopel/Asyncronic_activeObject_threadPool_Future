@@ -2,7 +2,7 @@ import static java.lang.Thread.sleep;
 
 public class myMain {
     public static void main(String[] args) throws Exception {
-        MyThreadPool tp = new MyThreadPool(5);
+        MyThreadPool tp = new MyThreadPool(5, 3);
         tp.execute(new someRunnable());
         tp.execute(new someRunnable());
         Future<String> f = tp.submit(new someCallable("kopel"));
@@ -16,8 +16,9 @@ public class myMain {
                 thenExecute(String::length).
                 thenExecute(x -> x * x).
                 thenAccept(System.out::println);
-        sleep(5000);
-        tp.stop();
+        sleep(10000);
+        // tp.stop();
         System.out.println("end of main");
+
     }
 }

@@ -7,20 +7,22 @@ import java.util.concurrent.Callable;
  */
 public class MyThreadPool {
     private int max;
+    private int timeOut;
     private ArrayList<ActiveObject> pool;
 
-    public MyThreadPool(int maxAO) throws Exception {
+    public MyThreadPool(int maxAO, int timeOut) throws Exception {
         if (maxAO < 1) {
             throw new Exception("The max must be larger then 1");
         }
         max = maxAO;
+        timeOut = timeOut;
         pool = new ArrayList<>();
         //this.queue = new PriorityBlockingQueue<>(maxAO, (Runnable a, Runnable b) -> {            return a.hashCode() - b.hashCode();        });
     }
 
     public void execute(Runnable r) throws InterruptedException {
         if (pool.size() < max) {
-            ActiveObject ao = new ActiveObject();
+            ActiveObject ao = new ActiveObject(timeOut);
             ao.execute(r);
             ao.start();
             pool.add(ao);
@@ -56,6 +58,4 @@ public class MyThreadPool {
             ao.stop();
         }
     }
-
-
 }

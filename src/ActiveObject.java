@@ -1,22 +1,31 @@
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
 public class ActiveObject {
     private BlockingQueue<Runnable> queue;
     private Thread thread;
     private volatile boolean stop;
 
-    public ActiveObject() {
+    public ActiveObject(int timeOut) {
         stop = false;
         queue = new LinkedBlockingDeque<>();
         thread = new Thread(() -> {
             while (!stop) {
                 try {
-                    queue.take().run();
+                    Runnable r = queue.poll(timeOut, TimeUnit.SECONDS);
+                    if (r == null) {
+                        break;
+                    } else {
+                        r.run();
+                    }
+                    //queue.take().run();
                 } catch (InterruptedException ignored) {
+                    //System.out.println("catch");
                 }
             }
+            System.out.println("Thread Exit!!");
         });
     }
 
